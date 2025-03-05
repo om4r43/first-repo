@@ -1,0 +1,34 @@
+import RPi.GPIO as GPIO
+import time
+import yagmail
+
+# Define the rain sensor GPIO pin
+rSensor = 17  
+
+# Setup GPIO with correct pull-up argument
+GPIO.setmode(GPIO.BCM)
+GPIO.setup(rSensor, GPIO.IN, pull_up_down=GPIO.PUD_UP)  
+
+# Email setup
+yag_mail = yagmail.SMTP(user='osnayfeh@gmail.com', password="qvmj jtir vqgx spwa", host='smtp.gmail.com')
+
+To = "neirotti@gwu.edu"
+Subject = "EMERGENCY ALERT: WATER LEAK DETECTED"
+Body = """
+        A water leak has been detected within your main electronics box!
+        
+        Please Bring ROV up IMMEDIATELY
+       """
+
+try:
+    while True:
+        if GPIO.input(rSensor) == GPIO.HIGH:  # If water is detected
+            print("Water detected! Sending email...")
+            yag_mail.send(to=To, subject=Subject, contents=Body)
+            print("Email sent successfully.")
+            
+            time.sleep(10)  # Prevent multiple emails too quickly
+
+except KeyboardInterrupt:
+    print("Exiting...")
+    GPIO.cleanup()
